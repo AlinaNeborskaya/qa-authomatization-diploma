@@ -9,6 +9,7 @@ import online.rabko.basketball.controller.converter.MatchConverter;
 import online.rabko.basketball.entity.Match;
 import online.rabko.basketball.service.impl.MatchServiceImpl;
 import online.rabko.model.PlayerStats;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,7 +64,6 @@ public class MatchesController implements MatchesApi {
     public ResponseEntity<online.rabko.model.Match> matchesPost(online.rabko.model.Match dto) {
         Match created = matchServiceImpl.create(matchConverter.convertBack(dto));
         return ResponseEntity.status(CREATED).body(matchConverter.convert(created));
-
     }
 
     /**
@@ -82,7 +82,7 @@ public class MatchesController implements MatchesApi {
      */
     @Override
     public ResponseEntity<List<PlayerStats>> matchesMatchIdStatsGet(Long matchId) {
-        return null;
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
     }
 
     /**
@@ -91,6 +91,6 @@ public class MatchesController implements MatchesApi {
     @Override
     public ResponseEntity<PlayerStats> matchesMatchIdStatsPost(Long matchId,
         PlayerStats playerStats) {
-        return null;
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
     }
 }

@@ -39,6 +39,7 @@ dependencies {
     implementation(group = "org.springframework.boot", name = "spring-boot-starter-oauth2-resource-server")
     implementation(group = "org.springframework.boot", name = "spring-boot-starter-jdbc")
     implementation(group = "org.springframework.boot", name = "spring-boot-starter-data-jpa")
+    implementation(group = "org.springframework.boot", name = "spring-boot-starter-data-rest")
     developmentOnly(group = "org.springframework.boot", name = "spring-boot-devtools")
 
     // Swagger
@@ -67,9 +68,9 @@ dependencies {
     runtimeOnly(group = "org.postgresql", name = "postgresql")
     implementation(group = "org.liquibase", name = "liquibase-core")
 
-    implementation("org.springframework.boot:spring-boot-starter-data-rest:3.5.0")
+    //Other
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
 }
-
 
 val jacocoExcludedClasses = listOf(
     "**/dto/**",
