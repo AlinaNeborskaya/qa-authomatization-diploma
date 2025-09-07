@@ -16,9 +16,11 @@ import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.util.List;
 import online.rabko.basketball.controller.MatchesController;
-import online.rabko.basketball.controller.converter.MatchConverter;
+import online.rabko.basketball.controller.mapper.MatchMapper;
 import online.rabko.basketball.entity.Match;
 import online.rabko.basketball.service.impl.MatchServiceImpl;
+import online.rabko.basketball.service.impl.SeasonServiceImpl;
+import online.rabko.basketball.service.impl.TeamServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +40,13 @@ class MatchesControllerTest {
     private MatchServiceImpl matchServiceImpl;
 
     @Mock
-    private MatchConverter matchConverter;
+    private SeasonServiceImpl seasonServiceImpl;
+
+    @Mock
+    private TeamServiceImpl teamServiceImpl;
+
+    @Mock
+    private MatchMapper matchMapper;
 
     @InjectMocks
     private MatchesController matchesController;
@@ -53,8 +61,8 @@ class MatchesControllerTest {
         Match m1 = Match.builder().id(1L).build();
         Match m2 = Match.builder().id(2L).build();
         when(matchServiceImpl.findAll()).thenReturn(List.of(m1, m2));
-        when(matchConverter.convert(m1)).thenReturn(new online.rabko.model.Match());
-        when(matchConverter.convert(m2)).thenReturn(new online.rabko.model.Match());
+        when(matchMapper.toDto(m1)).thenReturn(new online.rabko.model.Match());
+        when(matchMapper.toDto(m2)).thenReturn(new online.rabko.model.Match());
 
         given()
             .when()
@@ -64,7 +72,7 @@ class MatchesControllerTest {
             .body("$", hasSize(2));
 
         verify(matchServiceImpl).findAll();
-        verify(matchConverter, times(2)).convert(any(Match.class));
+        verify(matchMapper, times(2)).toDto(any(Match.class));
     }
 
     @Test
@@ -72,7 +80,7 @@ class MatchesControllerTest {
         Long id = 42L;
         Match entity = Match.builder().id(id).build();
         when(matchServiceImpl.findById(id)).thenReturn(entity);
-        when(matchConverter.convert(entity)).thenReturn(new online.rabko.model.Match());
+        when(matchMapper.toDto(entity)).thenReturn(new online.rabko.model.Match());
 
         given()
             .when()
@@ -82,16 +90,18 @@ class MatchesControllerTest {
             .body("$", notNullValue());
 
         verify(matchServiceImpl).findById(id);
-        verify(matchConverter).convert(entity);
+        verify(matchMapper).toDto(entity);
     }
 
     @Test
     void matchesPost_shouldCreateMatch() {
         Match toCreate = Match.builder().build();
         Match created = Match.builder().id(10L).build();
-        when(matchConverter.convertBack(any(online.rabko.model.Match.class))).thenReturn(toCreate);
+        when(matchMapper.toEntity(any(online.rabko.model.Match.class), eq(seasonServiceImpl),
+            eq(teamServiceImpl)))
+            .thenReturn(toCreate);
         when(matchServiceImpl.create(toCreate)).thenReturn(created);
-        when(matchConverter.convert(created)).thenReturn(new online.rabko.model.Match());
+        when(matchMapper.toDto(created)).thenReturn(new online.rabko.model.Match());
 
         given()
             .contentType(ContentType.JSON)
@@ -102,9 +112,10 @@ class MatchesControllerTest {
             .statusCode(201)
             .body("$", notNullValue());
 
-        verify(matchConverter).convertBack(any(online.rabko.model.Match.class));
+        verify(matchMapper).toEntity(any(online.rabko.model.Match.class), eq(seasonServiceImpl),
+            eq(teamServiceImpl));
         verify(matchServiceImpl).create(toCreate);
-        verify(matchConverter).convert(created);
+        verify(matchMapper).toDto(created);
     }
 
     @Test
@@ -112,9 +123,11 @@ class MatchesControllerTest {
         Long id = 7L;
         Match toUpdate = Match.builder().build();
         Match updated = Match.builder().id(id).build();
-        when(matchConverter.convertBack(any(online.rabko.model.Match.class))).thenReturn(toUpdate);
+        when(matchMapper.toEntity(any(online.rabko.model.Match.class), eq(seasonServiceImpl),
+            eq(teamServiceImpl)))
+            .thenReturn(toUpdate);
         when(matchServiceImpl.update(eq(id), eq(toUpdate))).thenReturn(updated);
-        when(matchConverter.convert(updated)).thenReturn(new online.rabko.model.Match());
+        when(matchMapper.toDto(updated)).thenReturn(new online.rabko.model.Match());
 
         given()
             .contentType(ContentType.JSON)
@@ -125,9 +138,10 @@ class MatchesControllerTest {
             .statusCode(200)
             .body("$", notNullValue());
 
-        verify(matchConverter).convertBack(any(online.rabko.model.Match.class));
+        verify(matchMapper).toEntity(any(online.rabko.model.Match.class), eq(seasonServiceImpl),
+            eq(teamServiceImpl));
         verify(matchServiceImpl).update(id, toUpdate);
-        verify(matchConverter).convert(updated);
+        verify(matchMapper).toDto(updated);
     }
 
     @Test
@@ -142,14 +156,14 @@ class MatchesControllerTest {
             .statusCode(204);
 
         verify(matchServiceImpl).delete(id);
-        verifyNoInteractions(matchConverter);
+        verifyNoInteractions(matchMapper);
     }
 
     @Test
     void matchesIdGet_shouldReturnNotFound() {
         Long id = 404L;
-        when(matchServiceImpl.findById(id)).thenThrow(
-            new ResponseStatusException(HttpStatus.NOT_FOUND));
+        when(matchServiceImpl.findById(id))
+            .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         given()
             .when()
@@ -173,8 +187,9 @@ class MatchesControllerTest {
 
     @Test
     void matchesPost_shouldReturnConflict() {
-        when(matchConverter.convertBack(any(online.rabko.model.Match.class))).thenReturn(
-            Match.builder().build());
+        when(matchMapper.toEntity(any(online.rabko.model.Match.class), eq(seasonServiceImpl),
+            eq(teamServiceImpl)))
+            .thenReturn(Match.builder().build());
         when(matchServiceImpl.create(any(Match.class)))
             .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
@@ -190,7 +205,8 @@ class MatchesControllerTest {
     @Test
     void matchesIdPut_shouldReturnBadRequest() {
         Long id = 5L;
-        when(matchConverter.convertBack(any(online.rabko.model.Match.class)))
+        when(matchMapper.toEntity(any(online.rabko.model.Match.class), eq(seasonServiceImpl),
+            eq(teamServiceImpl)))
             .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
         given()
@@ -205,8 +221,9 @@ class MatchesControllerTest {
     @Test
     void matchesIdPut_shouldReturnConflict() {
         Long id = 6L;
-        when(matchConverter.convertBack(any(online.rabko.model.Match.class))).thenReturn(
-            Match.builder().build());
+        when(matchMapper.toEntity(any(online.rabko.model.Match.class), eq(seasonServiceImpl),
+            eq(teamServiceImpl)))
+            .thenReturn(Match.builder().build());
         when(matchServiceImpl.update(eq(id), any(Match.class)))
             .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
