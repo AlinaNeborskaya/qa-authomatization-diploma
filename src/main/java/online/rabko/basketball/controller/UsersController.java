@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import online.rabko.api.UsersApi;
 import online.rabko.basketball.controller.mapper.UserMapper;
 import online.rabko.basketball.entity.User;
-import online.rabko.basketball.service.impl.UserServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballAppUserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UsersController implements UsersApi {
 
-    private final UserServiceImpl userServiceImpl;
+    private final BasketballAppUserService basketballAppUserService;
     private final UserMapper userMapper;
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<online.rabko.model.User>> usersGet() {
         return ResponseEntity.ok(
-            userServiceImpl.findAll().stream()
+            basketballAppUserService.findAll().stream()
                 .map(userMapper::toDto)
                 .toList()
         );
@@ -33,7 +33,7 @@ public class UsersController implements UsersApi {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.User> usersIdGet(Long id) {
-        return ResponseEntity.ok(userMapper.toDto(userServiceImpl.findById(id)));
+        return ResponseEntity.ok(userMapper.toDto(basketballAppUserService.findById(id)));
     }
 
     @Override
@@ -42,14 +42,14 @@ public class UsersController implements UsersApi {
         online.rabko.model.User dto) {
         User toUpdate = userMapper.toEntity(dto);
         toUpdate.setId(id);
-        User updated = userServiceImpl.update(id, toUpdate);
+        User updated = basketballAppUserService.update(id, toUpdate);
         return ResponseEntity.ok(userMapper.toDto(updated));
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> usersIdDelete(Long id) {
-        userServiceImpl.delete(id);
+        basketballAppUserService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

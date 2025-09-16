@@ -2,7 +2,7 @@ package online.rabko.basketball.security;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import online.rabko.basketball.service.impl.UserServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballAppUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,7 +34,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserServiceImpl userServiceImpl;
+    private final BasketballAppUserService basketballAppUserService;
 
     /**
      * Configures the main security filter chain: - Disables CSRF - Enables CORS with open wildcard
@@ -65,14 +65,14 @@ public class SecurityConfiguration {
 
     /**
      * Defines a custom authentication provider using {@link DaoAuthenticationProvider}, wired with
-     * the application's {@link UserServiceImpl} and a BCrypt password encoder.
+     * the application's {@link BasketballAppUserService} and a BCrypt password encoder.
      *
      * @return the AuthenticationProvider bean
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userServiceImpl.userDetailsService());
+        provider.setUserDetailsService(basketballAppUserService.userDetailsService());
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

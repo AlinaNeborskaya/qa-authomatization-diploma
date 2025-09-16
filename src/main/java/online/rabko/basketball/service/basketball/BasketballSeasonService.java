@@ -1,4 +1,4 @@
-package online.rabko.basketball.service.impl;
+package online.rabko.basketball.service.basketball;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class SeasonServiceImpl implements online.rabko.basketball.service.SeasonService {
+public class BasketballSeasonService implements online.rabko.basketball.service.SeasonService {
 
     private final SeasonRepository seasonRepository;
 

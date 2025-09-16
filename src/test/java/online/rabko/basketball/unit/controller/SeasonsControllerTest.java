@@ -18,7 +18,7 @@ import java.util.List;
 import online.rabko.basketball.controller.SeasonsController;
 import online.rabko.basketball.controller.mapper.SeasonMapper;
 import online.rabko.basketball.entity.Season;
-import online.rabko.basketball.service.impl.SeasonServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballSeasonService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 class SeasonsControllerTest {
 
     @Mock
-    private SeasonServiceImpl seasonServiceImpl;
+    private BasketballSeasonService basketballSeasonService;
 
     @Mock
     private SeasonMapper seasonMapper;
@@ -52,7 +52,7 @@ class SeasonsControllerTest {
     void seasonsGet_shouldReturnList() {
         Season s1 = Season.builder().id(1L).build();
         Season s2 = Season.builder().id(2L).build();
-        when(seasonServiceImpl.findAll()).thenReturn(List.of(s1, s2));
+        when(basketballSeasonService.findAll()).thenReturn(List.of(s1, s2));
         when(seasonMapper.toDto(s1)).thenReturn(new online.rabko.model.Season());
         when(seasonMapper.toDto(s2)).thenReturn(new online.rabko.model.Season());
 
@@ -63,7 +63,7 @@ class SeasonsControllerTest {
             .statusCode(200)
             .body("$", hasSize(2));
 
-        verify(seasonServiceImpl).findAll();
+        verify(basketballSeasonService).findAll();
         verify(seasonMapper, times(2)).toDto(any(Season.class));
     }
 
@@ -71,7 +71,7 @@ class SeasonsControllerTest {
     void seasonsIdGet_shouldReturnSeason() {
         Long id = 42L;
         Season entity = Season.builder().id(id).build();
-        when(seasonServiceImpl.findById(id)).thenReturn(entity);
+        when(basketballSeasonService.findById(id)).thenReturn(entity);
         when(seasonMapper.toDto(entity)).thenReturn(new online.rabko.model.Season());
 
         given()
@@ -81,7 +81,7 @@ class SeasonsControllerTest {
             .statusCode(200)
             .body("$", notNullValue());
 
-        verify(seasonServiceImpl).findById(id);
+        verify(basketballSeasonService).findById(id);
         verify(seasonMapper).toDto(entity);
     }
 
@@ -90,7 +90,7 @@ class SeasonsControllerTest {
         Season toCreate = Season.builder().build();
         Season created = Season.builder().id(10L).build();
         when(seasonMapper.toEntity(any(online.rabko.model.Season.class))).thenReturn(toCreate);
-        when(seasonServiceImpl.create(toCreate)).thenReturn(created);
+        when(basketballSeasonService.create(toCreate)).thenReturn(created);
         when(seasonMapper.toDto(created)).thenReturn(new online.rabko.model.Season());
 
         given()
@@ -103,7 +103,7 @@ class SeasonsControllerTest {
             .body("$", notNullValue());
 
         verify(seasonMapper).toEntity(any(online.rabko.model.Season.class));
-        verify(seasonServiceImpl).create(toCreate);
+        verify(basketballSeasonService).create(toCreate);
         verify(seasonMapper).toDto(created);
     }
 
@@ -113,7 +113,7 @@ class SeasonsControllerTest {
         Season replacement = Season.builder().build();
         Season updated = Season.builder().id(id).build();
         when(seasonMapper.toEntity(any(online.rabko.model.Season.class))).thenReturn(replacement);
-        when(seasonServiceImpl.update(eq(id), eq(replacement))).thenReturn(updated);
+        when(basketballSeasonService.update(eq(id), eq(replacement))).thenReturn(updated);
         when(seasonMapper.toDto(updated)).thenReturn(new online.rabko.model.Season());
 
         given()
@@ -126,14 +126,14 @@ class SeasonsControllerTest {
             .body("$", notNullValue());
 
         verify(seasonMapper).toEntity(any(online.rabko.model.Season.class));
-        verify(seasonServiceImpl).update(id, replacement);
+        verify(basketballSeasonService).update(id, replacement);
         verify(seasonMapper).toDto(updated);
     }
 
     @Test
     void seasonsIdDelete_shouldDeleteSeason() {
         Long id = 9L;
-        doNothing().when(seasonServiceImpl).delete(id);
+        doNothing().when(basketballSeasonService).delete(id);
 
         given()
             .when()
@@ -141,14 +141,14 @@ class SeasonsControllerTest {
             .then()
             .statusCode(204);
 
-        verify(seasonServiceImpl).delete(id);
+        verify(basketballSeasonService).delete(id);
         verifyNoInteractions(seasonMapper);
     }
 
     @Test
     void seasonsIdGet_shouldReturnNotFound() {
         Long id = 404L;
-        when(seasonServiceImpl.findById(id))
+        when(basketballSeasonService.findById(id))
             .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         given()
@@ -162,7 +162,7 @@ class SeasonsControllerTest {
     void seasonsIdDelete_shouldReturnNotFound() {
         Long id = 404L;
         doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-            .when(seasonServiceImpl).delete(id);
+            .when(basketballSeasonService).delete(id);
 
         given()
             .when()
@@ -205,7 +205,7 @@ class SeasonsControllerTest {
         Long id = 6L;
         when(seasonMapper.toEntity(any(online.rabko.model.Season.class)))
             .thenReturn(Season.builder().build());
-        when(seasonServiceImpl.update(eq(id), any(Season.class)))
+        when(basketballSeasonService.update(eq(id), any(Season.class)))
             .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
         given()

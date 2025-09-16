@@ -18,7 +18,7 @@ import java.util.List;
 import online.rabko.basketball.controller.TeamsController;
 import online.rabko.basketball.controller.mapper.TeamMapper;
 import online.rabko.basketball.entity.Team;
-import online.rabko.basketball.service.impl.TeamServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballTeamService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 class TeamsControllerTest {
 
     @Mock
-    private TeamServiceImpl teamServiceImpl;
+    private BasketballTeamService basketballTeamService;
 
     @Mock
     private TeamMapper teamMapper;
@@ -52,7 +52,7 @@ class TeamsControllerTest {
     void teamsGet_shouldReturnList() {
         Team t1 = Team.builder().id(1L).name("Team A").build();
         Team t2 = Team.builder().id(2L).name("Team B").build();
-        when(teamServiceImpl.findAll()).thenReturn(List.of(t1, t2));
+        when(basketballTeamService.findAll()).thenReturn(List.of(t1, t2));
         when(teamMapper.toDto(t1)).thenReturn(new online.rabko.model.Team());
         when(teamMapper.toDto(t2)).thenReturn(new online.rabko.model.Team());
 
@@ -63,7 +63,7 @@ class TeamsControllerTest {
             .statusCode(200)
             .body("$", hasSize(2));
 
-        verify(teamServiceImpl).findAll();
+        verify(basketballTeamService).findAll();
         verify(teamMapper, times(2)).toDto(any(Team.class));
     }
 
@@ -71,7 +71,7 @@ class TeamsControllerTest {
     void teamsIdGet_shouldReturnTeam() {
         Long id = 42L;
         Team entity = Team.builder().id(id).name("Team X").build();
-        when(teamServiceImpl.findById(id)).thenReturn(entity);
+        when(basketballTeamService.findById(id)).thenReturn(entity);
         when(teamMapper.toDto(entity)).thenReturn(new online.rabko.model.Team());
 
         given()
@@ -81,7 +81,7 @@ class TeamsControllerTest {
             .statusCode(200)
             .body("$", notNullValue());
 
-        verify(teamServiceImpl).findById(id);
+        verify(basketballTeamService).findById(id);
         verify(teamMapper).toDto(entity);
     }
 
@@ -90,7 +90,7 @@ class TeamsControllerTest {
         Team toCreate = Team.builder().name("New Team").build();
         Team created = Team.builder().id(10L).name("New Team").build();
         when(teamMapper.toEntity(any(online.rabko.model.Team.class))).thenReturn(toCreate);
-        when(teamServiceImpl.create(toCreate)).thenReturn(created);
+        when(basketballTeamService.create(toCreate)).thenReturn(created);
         when(teamMapper.toDto(created)).thenReturn(new online.rabko.model.Team());
 
         given()
@@ -103,7 +103,7 @@ class TeamsControllerTest {
             .body("$", notNullValue());
 
         verify(teamMapper).toEntity(any(online.rabko.model.Team.class));
-        verify(teamServiceImpl).create(toCreate);
+        verify(basketballTeamService).create(toCreate);
         verify(teamMapper).toDto(created);
     }
 
@@ -113,7 +113,7 @@ class TeamsControllerTest {
         Team toUpdate = Team.builder().name("Updated Team").build();
         Team updated = Team.builder().id(id).name("Updated Team").build();
         when(teamMapper.toEntity(any(online.rabko.model.Team.class))).thenReturn(toUpdate);
-        when(teamServiceImpl.update(eq(id), eq(toUpdate))).thenReturn(updated);
+        when(basketballTeamService.update(eq(id), eq(toUpdate))).thenReturn(updated);
         when(teamMapper.toDto(updated)).thenReturn(new online.rabko.model.Team());
 
         given()
@@ -126,14 +126,14 @@ class TeamsControllerTest {
             .body("$", notNullValue());
 
         verify(teamMapper).toEntity(any(online.rabko.model.Team.class));
-        verify(teamServiceImpl).update(id, toUpdate);
+        verify(basketballTeamService).update(id, toUpdate);
         verify(teamMapper).toDto(updated);
     }
 
     @Test
     void teamsIdDelete_shouldDeleteTeam() {
         Long id = 9L;
-        doNothing().when(teamServiceImpl).delete(id);
+        doNothing().when(basketballTeamService).delete(id);
 
         given()
             .when()
@@ -141,14 +141,14 @@ class TeamsControllerTest {
             .then()
             .statusCode(204);
 
-        verify(teamServiceImpl).delete(id);
+        verify(basketballTeamService).delete(id);
         verifyNoInteractions(teamMapper);
     }
 
     @Test
     void teamsIdGet_shouldReturnNotFound() {
         Long id = 404L;
-        when(teamServiceImpl.findById(id))
+        when(basketballTeamService.findById(id))
             .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         given()
@@ -162,7 +162,7 @@ class TeamsControllerTest {
     void teamsIdDelete_shouldReturnConflict() {
         Long id = 1L;
         doThrow(new ResponseStatusException(HttpStatus.CONFLICT))
-            .when(teamServiceImpl).delete(id);
+            .when(basketballTeamService).delete(id);
 
         given()
             .when()

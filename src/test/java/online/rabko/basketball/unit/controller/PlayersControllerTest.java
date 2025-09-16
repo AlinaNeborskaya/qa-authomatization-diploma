@@ -18,7 +18,7 @@ import java.util.List;
 import online.rabko.basketball.controller.PlayersController;
 import online.rabko.basketball.controller.mapper.PlayerMapper;
 import online.rabko.basketball.entity.Player;
-import online.rabko.basketball.service.impl.PlayerServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballPlayerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 class PlayersControllerTest {
 
     @Mock
-    private PlayerServiceImpl playerServiceImpl;
+    private BasketballPlayerService basketballPlayerService;
 
     @Mock
     private PlayerMapper playerMapper;
@@ -52,7 +52,7 @@ class PlayersControllerTest {
     void playersGet_shouldReturnList() {
         Player p1 = Player.builder().id(1L).build();
         Player p2 = Player.builder().id(2L).build();
-        when(playerServiceImpl.findAll()).thenReturn(List.of(p1, p2));
+        when(basketballPlayerService.findAll()).thenReturn(List.of(p1, p2));
         when(playerMapper.toDto(p1)).thenReturn(new online.rabko.model.Player());
         when(playerMapper.toDto(p2)).thenReturn(new online.rabko.model.Player());
 
@@ -63,7 +63,7 @@ class PlayersControllerTest {
             .statusCode(200)
             .body("$", hasSize(2));
 
-        verify(playerServiceImpl).findAll();
+        verify(basketballPlayerService).findAll();
         verify(playerMapper, times(2)).toDto(any(Player.class));
     }
 
@@ -71,7 +71,7 @@ class PlayersControllerTest {
     void playersIdGet_shouldReturnPlayer() {
         Long id = 42L;
         Player entity = Player.builder().id(id).build();
-        when(playerServiceImpl.findById(id)).thenReturn(entity);
+        when(basketballPlayerService.findById(id)).thenReturn(entity);
         when(playerMapper.toDto(entity)).thenReturn(new online.rabko.model.Player());
 
         given()
@@ -81,7 +81,7 @@ class PlayersControllerTest {
             .statusCode(200)
             .body("$", notNullValue());
 
-        verify(playerServiceImpl).findById(id);
+        verify(basketballPlayerService).findById(id);
         verify(playerMapper).toDto(entity);
     }
 
@@ -91,7 +91,7 @@ class PlayersControllerTest {
         Player created = Player.builder().id(10L).build();
 
         when(playerMapper.toEntity(any(online.rabko.model.Player.class))).thenReturn(toCreate);
-        when(playerServiceImpl.create(toCreate)).thenReturn(created);
+        when(basketballPlayerService.create(toCreate)).thenReturn(created);
         when(playerMapper.toDto(created)).thenReturn(new online.rabko.model.Player());
 
         given()
@@ -104,7 +104,7 @@ class PlayersControllerTest {
             .body("$", notNullValue());
 
         verify(playerMapper).toEntity(any(online.rabko.model.Player.class));
-        verify(playerServiceImpl).create(toCreate);
+        verify(basketballPlayerService).create(toCreate);
         verify(playerMapper).toDto(created);
     }
 
@@ -115,7 +115,7 @@ class PlayersControllerTest {
         Player updated = Player.builder().id(id).build();
 
         when(playerMapper.toEntity(any(online.rabko.model.Player.class))).thenReturn(toUpdate);
-        when(playerServiceImpl.update(eq(id), eq(toUpdate))).thenReturn(updated);
+        when(basketballPlayerService.update(eq(id), eq(toUpdate))).thenReturn(updated);
         when(playerMapper.toDto(updated)).thenReturn(new online.rabko.model.Player());
 
         given()
@@ -128,14 +128,14 @@ class PlayersControllerTest {
             .body("$", notNullValue());
 
         verify(playerMapper).toEntity(any(online.rabko.model.Player.class));
-        verify(playerServiceImpl).update(id, toUpdate);
+        verify(basketballPlayerService).update(id, toUpdate);
         verify(playerMapper).toDto(updated);
     }
 
     @Test
     void playersIdDelete_shouldDeletePlayer() {
         Long id = 9L;
-        doNothing().when(playerServiceImpl).delete(id);
+        doNothing().when(basketballPlayerService).delete(id);
 
         given()
             .when()
@@ -143,14 +143,14 @@ class PlayersControllerTest {
             .then()
             .statusCode(204);
 
-        verify(playerServiceImpl).delete(id);
+        verify(basketballPlayerService).delete(id);
         verifyNoInteractions(playerMapper);
     }
 
     @Test
     void playersIdGet_shouldReturnNotFound() {
         Long id = 404L;
-        when(playerServiceImpl.findById(id))
+        when(basketballPlayerService.findById(id))
             .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         given()
@@ -164,7 +164,7 @@ class PlayersControllerTest {
     void playersIdDelete_shouldReturnNotFound() {
         Long id = 404L;
         doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-            .when(playerServiceImpl).delete(id);
+            .when(basketballPlayerService).delete(id);
 
         given()
             .when()
@@ -207,7 +207,7 @@ class PlayersControllerTest {
         Long id = 6L;
         when(playerMapper.toEntity(any(online.rabko.model.Player.class)))
             .thenReturn(Player.builder().build());
-        when(playerServiceImpl.update(eq(id), any(Player.class)))
+        when(basketballPlayerService.update(eq(id), any(Player.class)))
             .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
         given()

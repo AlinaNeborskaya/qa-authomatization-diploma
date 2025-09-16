@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import online.rabko.basketball.entity.User;
 import online.rabko.basketball.repository.UserRepository;
-import online.rabko.basketball.service.impl.UserServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballAppUserService;
 import online.rabko.model.Role;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,16 +21,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
- * Unit tests for {@link UserServiceImpl}.
+ * Unit tests for {@link BasketballAppUserService}.
  */
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+class BasketballAppUserServiceTest {
 
     @Mock
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserServiceImpl userService;
+    private BasketballAppUserService userService;
 
     @Test
     void save_shouldPersistUser() {

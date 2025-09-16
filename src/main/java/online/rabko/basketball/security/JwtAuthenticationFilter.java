@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import online.rabko.basketball.service.impl.UserServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballAppUserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
-    private final UserServiceImpl userServiceImpl;
+    private final BasketballAppUserService basketballAppUserService;
 
     /**
      * Processes the incoming HTTP request, extracts JWT token (if present), validates it, and sets
@@ -66,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.isNotEmpty(username) && Objects.isNull(
             SecurityContextHolder.getContext().getAuthentication())) {
 
-            UserDetails userDetails = userServiceImpl.userDetailsService()
+            UserDetails userDetails = basketballAppUserService.userDetailsService()
                 .loadUserByUsername(username);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {

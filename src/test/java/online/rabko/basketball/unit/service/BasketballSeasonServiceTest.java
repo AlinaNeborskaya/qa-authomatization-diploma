@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import online.rabko.basketball.entity.Season;
 import online.rabko.basketball.repository.SeasonRepository;
-import online.rabko.basketball.service.impl.SeasonServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballSeasonService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,16 +23,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * Unit tests for {@link SeasonServiceImpl}.
+ * Unit tests for {@link BasketballSeasonService}.
  */
 @ExtendWith(MockitoExtension.class)
-class SeasonServiceImplTest {
+class BasketballSeasonServiceTest {
 
     @Mock
     private SeasonRepository seasonRepository;
 
     @InjectMocks
-    private SeasonServiceImpl seasonService;
+    private BasketballSeasonService seasonService;
 
     @Test
     void findAll_shouldReturnList() {

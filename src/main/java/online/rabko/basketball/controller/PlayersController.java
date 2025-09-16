@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import online.rabko.api.PlayersApi;
 import online.rabko.basketball.controller.mapper.PlayerMapper;
 import online.rabko.basketball.entity.Player;
-import online.rabko.basketball.service.impl.PlayerServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballPlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PlayersController implements PlayersApi {
 
-    private final PlayerServiceImpl playerServiceImpl;
+    private final BasketballPlayerService basketballPlayerService;
     private final PlayerMapper playerMapper;
 
     @Override
     public ResponseEntity<List<online.rabko.model.Player>> playersGet() {
         return ResponseEntity.ok(
-            playerServiceImpl.findAll().stream()
+            basketballPlayerService.findAll().stream()
                 .map(playerMapper::toDto)
                 .toList()
         );
@@ -34,14 +34,14 @@ public class PlayersController implements PlayersApi {
     @Override
     public ResponseEntity<online.rabko.model.Player> playersIdGet(Long id) {
         return ResponseEntity.ok(
-            playerMapper.toDto(playerServiceImpl.findById(id))
+            playerMapper.toDto(basketballPlayerService.findById(id))
         );
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Player> playersPost(online.rabko.model.Player dto) {
-        Player created = playerServiceImpl.create(playerMapper.toEntity(dto));
+        Player created = basketballPlayerService.create(playerMapper.toEntity(dto));
         return ResponseEntity.status(CREATED).body(playerMapper.toDto(created));
     }
 
@@ -49,14 +49,14 @@ public class PlayersController implements PlayersApi {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Player> playersIdPut(Long id,
         online.rabko.model.Player dto) {
-        Player updated = playerServiceImpl.update(id, playerMapper.toEntity(dto));
+        Player updated = basketballPlayerService.update(id, playerMapper.toEntity(dto));
         return ResponseEntity.ok(playerMapper.toDto(updated));
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> playersIdDelete(Long id) {
-        playerServiceImpl.delete(id);
+        basketballPlayerService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

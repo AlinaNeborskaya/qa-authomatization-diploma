@@ -18,7 +18,7 @@ import java.util.List;
 import online.rabko.basketball.controller.MatchesController;
 import online.rabko.basketball.controller.mapper.MatchMapper;
 import online.rabko.basketball.entity.Match;
-import online.rabko.basketball.service.impl.MatchServiceImpl;
+import online.rabko.basketball.service.basketball.BasketballMatchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 class MatchesControllerTest {
 
     @Mock
-    private MatchServiceImpl matchServiceImpl;
+    private BasketballMatchService basketballMatchService;
 
     @Mock
     private MatchMapper matchMapper;
@@ -52,7 +52,7 @@ class MatchesControllerTest {
     void matchesGet_shouldReturnList() {
         Match m1 = Match.builder().id(1L).build();
         Match m2 = Match.builder().id(2L).build();
-        when(matchServiceImpl.findAll()).thenReturn(List.of(m1, m2));
+        when(basketballMatchService.findAll()).thenReturn(List.of(m1, m2));
         when(matchMapper.toDto(m1)).thenReturn(new online.rabko.model.Match());
         when(matchMapper.toDto(m2)).thenReturn(new online.rabko.model.Match());
 
@@ -63,7 +63,7 @@ class MatchesControllerTest {
             .statusCode(200)
             .body("$", hasSize(2));
 
-        verify(matchServiceImpl).findAll();
+        verify(basketballMatchService).findAll();
         verify(matchMapper, times(2)).toDto(any(Match.class));
     }
 
@@ -71,7 +71,7 @@ class MatchesControllerTest {
     void matchesIdGet_shouldReturnMatch() {
         Long id = 42L;
         Match entity = Match.builder().id(id).build();
-        when(matchServiceImpl.findById(id)).thenReturn(entity);
+        when(basketballMatchService.findById(id)).thenReturn(entity);
         when(matchMapper.toDto(entity)).thenReturn(new online.rabko.model.Match());
 
         given()
@@ -81,7 +81,7 @@ class MatchesControllerTest {
             .statusCode(200)
             .body("$", notNullValue());
 
-        verify(matchServiceImpl).findById(id);
+        verify(basketballMatchService).findById(id);
         verify(matchMapper).toDto(entity);
     }
 
@@ -91,7 +91,7 @@ class MatchesControllerTest {
         Match created = Match.builder().id(10L).build();
 
         when(matchMapper.toEntity(any(online.rabko.model.Match.class))).thenReturn(toCreate);
-        when(matchServiceImpl.create(toCreate)).thenReturn(created);
+        when(basketballMatchService.create(toCreate)).thenReturn(created);
         when(matchMapper.toDto(created)).thenReturn(new online.rabko.model.Match());
 
         given()
@@ -104,7 +104,7 @@ class MatchesControllerTest {
             .body("$", notNullValue());
 
         verify(matchMapper).toEntity(any(online.rabko.model.Match.class));
-        verify(matchServiceImpl).create(toCreate);
+        verify(basketballMatchService).create(toCreate);
         verify(matchMapper).toDto(created);
     }
 
@@ -115,7 +115,7 @@ class MatchesControllerTest {
         Match updated = Match.builder().id(id).build();
 
         when(matchMapper.toEntity(any(online.rabko.model.Match.class))).thenReturn(toUpdate);
-        when(matchServiceImpl.update(eq(id), eq(toUpdate))).thenReturn(updated);
+        when(basketballMatchService.update(eq(id), eq(toUpdate))).thenReturn(updated);
         when(matchMapper.toDto(updated)).thenReturn(new online.rabko.model.Match());
 
         given()
@@ -128,14 +128,14 @@ class MatchesControllerTest {
             .body("$", notNullValue());
 
         verify(matchMapper).toEntity(any(online.rabko.model.Match.class));
-        verify(matchServiceImpl).update(id, toUpdate);
+        verify(basketballMatchService).update(id, toUpdate);
         verify(matchMapper).toDto(updated);
     }
 
     @Test
     void matchesIdDelete_shouldDeleteMatch() {
         Long id = 9L;
-        doNothing().when(matchServiceImpl).delete(id);
+        doNothing().when(basketballMatchService).delete(id);
 
         given()
             .when()
@@ -143,14 +143,14 @@ class MatchesControllerTest {
             .then()
             .statusCode(204);
 
-        verify(matchServiceImpl).delete(id);
+        verify(basketballMatchService).delete(id);
         verifyNoInteractions(matchMapper);
     }
 
     @Test
     void matchesIdGet_shouldReturnNotFound() {
         Long id = 404L;
-        when(matchServiceImpl.findById(id))
+        when(basketballMatchService.findById(id))
             .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         given()
@@ -164,7 +164,7 @@ class MatchesControllerTest {
     void matchesIdDelete_shouldReturnNotFound() {
         Long id = 404L;
         doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-            .when(matchServiceImpl).delete(id);
+            .when(basketballMatchService).delete(id);
 
         given()
             .when()
@@ -177,7 +177,7 @@ class MatchesControllerTest {
     void matchesPost_shouldReturnConflict() {
         when(matchMapper.toEntity(any(online.rabko.model.Match.class)))
             .thenReturn(Match.builder().build());
-        when(matchServiceImpl.create(any(Match.class)))
+        when(basketballMatchService.create(any(Match.class)))
             .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
         given()
@@ -209,7 +209,7 @@ class MatchesControllerTest {
         Long id = 6L;
         when(matchMapper.toEntity(any(online.rabko.model.Match.class)))
             .thenReturn(Match.builder().build());
-        when(matchServiceImpl.update(eq(id), any(Match.class)))
+        when(basketballMatchService.update(eq(id), any(Match.class)))
             .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
         given()
