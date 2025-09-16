@@ -3,38 +3,22 @@ package online.rabko.basketball.unit.controller.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import online.rabko.basketball.controller.mapper.MatchMapper;
 import online.rabko.basketball.entity.Match;
 import online.rabko.basketball.entity.Season;
 import online.rabko.basketball.entity.Team;
-import online.rabko.basketball.service.impl.SeasonServiceImpl;
-import online.rabko.basketball.service.impl.TeamServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests for {@link MatchMapper}.
  */
-@ExtendWith(MockitoExtension.class)
 class MatchMapperTest {
 
-    private MatchMapper mapper;
-
-    @Mock
-    private SeasonServiceImpl seasonServiceImpl;
-
-    @Mock
-    private TeamServiceImpl teamServiceImpl;
+    private final MatchMapper mapper = Mappers.getMapper(MatchMapper.class);
 
     private Season season;
     private Team home;
@@ -42,7 +26,6 @@ class MatchMapperTest {
 
     @BeforeEach
     void setUp() {
-        mapper = Mappers.getMapper(MatchMapper.class);
         season = Season.builder().id(1L).build();
         home = Team.builder().id(10L).build();
         away = Team.builder().id(20L).build();
@@ -97,10 +80,10 @@ class MatchMapperTest {
     }
 
     @Test
-    void toEntity_shouldMapAllFields_andLookupRelations() {
+    void toEntity_shouldMapScalars_andWrapIdsIntoShallowRelations() {
         LocalDate date = LocalDate.of(2025, 3, 4);
         online.rabko.model.Match dto = new online.rabko.model.Match()
-            .id(999L) // будет проигнорирован при toEntity
+            .id(999L)
             .seasonId(1L)
             .date(date)
             .homeTeamId(10L)
@@ -108,46 +91,45 @@ class MatchMapperTest {
             .homeTeamScore(70)
             .awayTeamScore(71);
 
-        when(seasonServiceImpl.findById(1L)).thenReturn(season);
-        when(teamServiceImpl.findById(10L)).thenReturn(home);
-        when(teamServiceImpl.findById(20L)).thenReturn(away);
-
-        Match entity = mapper.toEntity(dto, seasonServiceImpl, teamServiceImpl);
+        Match entity = mapper.toEntity(dto);
 
         assertNull(entity.getId());
         assertEquals(date, entity.getDate());
         assertEquals(70, entity.getHomeTeamScore());
         assertEquals(71, entity.getAwayTeamScore());
+
         assertNotNull(entity.getSeason());
         assertEquals(1L, entity.getSeason().getId());
+
         assertNotNull(entity.getHomeTeam());
         assertEquals(10L, entity.getHomeTeam().getId());
+
         assertNotNull(entity.getAwayTeam());
         assertEquals(20L, entity.getAwayTeam().getId());
-
-        verify(seasonServiceImpl).findById(eq(1L));
-        verify(teamServiceImpl).findById(eq(10L));
-        verify(teamServiceImpl).findById(eq(20L));
     }
 
     @Test
-    void toEntity_shouldSkipLookups_whenIdsNull() {
+    void toEntity_shouldLeaveRelationsNull_whenIdsNull() {
         LocalDate date = LocalDate.of(2025, 4, 5);
         online.rabko.model.Match dto = new online.rabko.model.Match()
             .date(date)
             .homeTeamScore(10)
             .awayTeamScore(11);
 
-        Match entity = mapper.toEntity(dto, seasonServiceImpl, teamServiceImpl);
+        Match entity = mapper.toEntity(dto);
 
         assertEquals(date, entity.getDate());
         assertEquals(10, entity.getHomeTeamScore());
         assertEquals(11, entity.getAwayTeamScore());
-        assertNull(entity.getSeason());
-        assertNull(entity.getHomeTeam());
-        assertNull(entity.getAwayTeam());
 
-        verifyNoInteractions(seasonServiceImpl);
-        verifyNoInteractions(teamServiceImpl);
+        assertNotNull(entity.getSeason());
+        assertNull(entity.getSeason().getId());
+
+        assertNotNull(entity.getHomeTeam());
+        assertNull(entity.getHomeTeam().getId());
+
+        assertNotNull(entity.getAwayTeam());
+        assertNull(entity.getAwayTeam().getId());
     }
+
 }

@@ -1,10 +1,6 @@
 package online.rabko.basketball.controller.mapper;
 
 import online.rabko.basketball.entity.Match;
-import online.rabko.basketball.service.impl.SeasonServiceImpl;
-import online.rabko.basketball.service.impl.TeamServiceImpl;
-import org.mapstruct.Context;
-import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -29,24 +25,10 @@ public interface MatchMapper {
     /**
      * Converts a Match DTO to a Match entity.
      */
-    @InheritInverseConfiguration(name = "toDto")
     @Mapping(target = "id", ignore = true)
-    @Mapping(
-        target = "season",
-        expression =
-            "java(dto.getSeasonId() == null ? null : seasonService.findById(dto.getSeasonId()))"
-    )
-    @Mapping(
-        target = "homeTeam",
-        expression =
-            "java(dto.getHomeTeamId() == null ? null : teamService.findById(dto.getHomeTeamId()))"
-    )
-    @Mapping(
-        target = "awayTeam",
-        expression =
-            "java(dto.getAwayTeamId() == null ? null : teamService.findById(dto.getAwayTeamId()))"
-    )
-    Match toEntity(online.rabko.model.Match dto,
-        @Context SeasonServiceImpl seasonService,
-        @Context TeamServiceImpl teamService);
+    @Mapping(target = "season.id", source = "seasonId")
+    @Mapping(target = "homeTeam.id", source = "homeTeamId")
+    @Mapping(target = "awayTeam.id", source = "awayTeamId")
+    Match toEntity(online.rabko.model.Match dto);
 }
+

@@ -8,8 +8,6 @@ import online.rabko.api.MatchesApi;
 import online.rabko.basketball.controller.mapper.MatchMapper;
 import online.rabko.basketball.entity.Match;
 import online.rabko.basketball.service.impl.MatchServiceImpl;
-import online.rabko.basketball.service.impl.SeasonServiceImpl;
-import online.rabko.basketball.service.impl.TeamServiceImpl;
 import online.rabko.model.PlayerStats;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MatchesController implements MatchesApi {
 
     private final MatchServiceImpl matchServiceImpl;
-    private final SeasonServiceImpl seasonServiceImpl;
-    private final TeamServiceImpl teamServiceImpl;
     private final MatchMapper matchMapper;
 
     /**
@@ -66,9 +62,7 @@ public class MatchesController implements MatchesApi {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Match> matchesPost(online.rabko.model.Match dto) {
-        Match created = matchServiceImpl.create(
-            matchMapper.toEntity(dto, seasonServiceImpl, teamServiceImpl)
-        );
+        Match created = matchServiceImpl.create(matchMapper.toEntity(dto));
         return ResponseEntity.status(CREATED).body(matchMapper.toDto(created));
     }
 
@@ -79,10 +73,7 @@ public class MatchesController implements MatchesApi {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Match> matchesIdPut(Long id,
         online.rabko.model.Match dto) {
-        Match updated = matchServiceImpl.update(
-            id,
-            matchMapper.toEntity(dto, seasonServiceImpl, teamServiceImpl)
-        );
+        Match updated = matchServiceImpl.update(id, matchMapper.toEntity(dto));
         return ResponseEntity.ok(matchMapper.toDto(updated));
     }
 

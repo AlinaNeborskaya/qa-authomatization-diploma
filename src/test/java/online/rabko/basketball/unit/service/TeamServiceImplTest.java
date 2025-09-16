@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import online.rabko.basketball.entity.Team;
 import online.rabko.basketball.repository.TeamRepository;
-import online.rabko.basketball.service.TeamService;
 import online.rabko.basketball.service.impl.TeamServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -104,7 +103,7 @@ class TeamServiceImplTest {
 
         when(teamRepository.findById(id)).thenReturn(Optional.of(existing));
         when(teamRepository.existsByNameIgnoreCase("Same")).thenReturn(
-            true); // есть такая команда, но это мы же
+            true);
         when(teamRepository.save(any(Team.class))).thenReturn(saved);
 
         Team result = teamService.update(id, replacement);

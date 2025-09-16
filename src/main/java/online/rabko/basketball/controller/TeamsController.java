@@ -5,38 +5,39 @@ import static org.springframework.http.HttpStatus.CREATED;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import online.rabko.api.TeamsApi;
-import online.rabko.basketball.controller.converter.TeamConverter;
+import online.rabko.basketball.controller.mapper.TeamMapper;
 import online.rabko.basketball.entity.Team;
 import online.rabko.basketball.service.impl.TeamServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing teams.
  */
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class TeamsController implements TeamsApi {
 
     private final TeamServiceImpl teamServiceImpl;
-    private final TeamConverter teamConverter;
+    private final TeamMapper teamMapper;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ResponseEntity<List<online.rabko.model.Team>> teamsGet() {
-        List<Team> teams = teamServiceImpl.findAll();
         return ResponseEntity.ok(
-            teams.stream()
-                .map(teamConverter::convert)
-                .toList());
+            teamServiceImpl.findAll().stream()
+                .map(teamMapper::toDto)
+                .toList()
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public ResponseEntity<online.rabko.model.Team> teamsIdGet(Long id) {
+        return ResponseEntity.ok(
+            teamMapper.toDto(teamServiceImpl.findById(id))
+        );
+    }
+
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> teamsIdDelete(Long id) {
@@ -44,36 +45,18 @@ public class TeamsController implements TeamsApi {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ResponseEntity<online.rabko.model.Team> teamsIdGet(Long id) {
-        Team team = teamServiceImpl.findById(id);
-        return ResponseEntity.ok(teamConverter.convert(team));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Team> teamsIdPut(Long id,
-        online.rabko.model.Team teamDto) {
-        Team team = teamConverter.convertBack(teamDto);
-        Team updated = teamServiceImpl.update(id, team);
-        return ResponseEntity.ok(teamConverter.convert(updated));
+        online.rabko.model.Team dto) {
+        Team updated = teamServiceImpl.update(id, teamMapper.toEntity(dto));
+        return ResponseEntity.ok(teamMapper.toDto(updated));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<online.rabko.model.Team> teamsPost(online.rabko.model.Team teamDto) {
-        Team team = teamConverter.convertBack(teamDto);
-        Team created = teamServiceImpl.create(team);
-        return ResponseEntity.status(CREATED).body(teamConverter.convert(created));
-
+    public ResponseEntity<online.rabko.model.Team> teamsPost(online.rabko.model.Team dto) {
+        Team created = teamServiceImpl.create(teamMapper.toEntity(dto));
+        return ResponseEntity.status(CREATED).body(teamMapper.toDto(created));
     }
 }

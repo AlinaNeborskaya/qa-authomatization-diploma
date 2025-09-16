@@ -16,7 +16,7 @@ import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.util.List;
 import online.rabko.basketball.controller.TeamsController;
-import online.rabko.basketball.controller.converter.TeamConverter;
+import online.rabko.basketball.controller.mapper.TeamMapper;
 import online.rabko.basketball.entity.Team;
 import online.rabko.basketball.service.impl.TeamServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ class TeamsControllerTest {
     private TeamServiceImpl teamServiceImpl;
 
     @Mock
-    private TeamConverter teamConverter;
+    private TeamMapper teamMapper;
 
     @InjectMocks
     private TeamsController teamsController;
@@ -53,8 +53,8 @@ class TeamsControllerTest {
         Team t1 = Team.builder().id(1L).name("Team A").build();
         Team t2 = Team.builder().id(2L).name("Team B").build();
         when(teamServiceImpl.findAll()).thenReturn(List.of(t1, t2));
-        when(teamConverter.convert(t1)).thenReturn(new online.rabko.model.Team());
-        when(teamConverter.convert(t2)).thenReturn(new online.rabko.model.Team());
+        when(teamMapper.toDto(t1)).thenReturn(new online.rabko.model.Team());
+        when(teamMapper.toDto(t2)).thenReturn(new online.rabko.model.Team());
 
         given()
             .when()
@@ -64,7 +64,7 @@ class TeamsControllerTest {
             .body("$", hasSize(2));
 
         verify(teamServiceImpl).findAll();
-        verify(teamConverter, times(2)).convert(any(Team.class));
+        verify(teamMapper, times(2)).toDto(any(Team.class));
     }
 
     @Test
@@ -72,7 +72,7 @@ class TeamsControllerTest {
         Long id = 42L;
         Team entity = Team.builder().id(id).name("Team X").build();
         when(teamServiceImpl.findById(id)).thenReturn(entity);
-        when(teamConverter.convert(entity)).thenReturn(new online.rabko.model.Team());
+        when(teamMapper.toDto(entity)).thenReturn(new online.rabko.model.Team());
 
         given()
             .when()
@@ -82,16 +82,16 @@ class TeamsControllerTest {
             .body("$", notNullValue());
 
         verify(teamServiceImpl).findById(id);
-        verify(teamConverter).convert(entity);
+        verify(teamMapper).toDto(entity);
     }
 
     @Test
     void teamsPost_shouldCreateTeam() {
         Team toCreate = Team.builder().name("New Team").build();
         Team created = Team.builder().id(10L).name("New Team").build();
-        when(teamConverter.convertBack(any(online.rabko.model.Team.class))).thenReturn(toCreate);
+        when(teamMapper.toEntity(any(online.rabko.model.Team.class))).thenReturn(toCreate);
         when(teamServiceImpl.create(toCreate)).thenReturn(created);
-        when(teamConverter.convert(created)).thenReturn(new online.rabko.model.Team());
+        when(teamMapper.toDto(created)).thenReturn(new online.rabko.model.Team());
 
         given()
             .contentType(ContentType.JSON)
@@ -102,9 +102,9 @@ class TeamsControllerTest {
             .statusCode(201)
             .body("$", notNullValue());
 
-        verify(teamConverter).convertBack(any(online.rabko.model.Team.class));
+        verify(teamMapper).toEntity(any(online.rabko.model.Team.class));
         verify(teamServiceImpl).create(toCreate);
-        verify(teamConverter).convert(created);
+        verify(teamMapper).toDto(created);
     }
 
     @Test
@@ -112,9 +112,9 @@ class TeamsControllerTest {
         Long id = 7L;
         Team toUpdate = Team.builder().name("Updated Team").build();
         Team updated = Team.builder().id(id).name("Updated Team").build();
-        when(teamConverter.convertBack(any(online.rabko.model.Team.class))).thenReturn(toUpdate);
+        when(teamMapper.toEntity(any(online.rabko.model.Team.class))).thenReturn(toUpdate);
         when(teamServiceImpl.update(eq(id), eq(toUpdate))).thenReturn(updated);
-        when(teamConverter.convert(updated)).thenReturn(new online.rabko.model.Team());
+        when(teamMapper.toDto(updated)).thenReturn(new online.rabko.model.Team());
 
         given()
             .contentType(ContentType.JSON)
@@ -125,9 +125,9 @@ class TeamsControllerTest {
             .statusCode(200)
             .body("$", notNullValue());
 
-        verify(teamConverter).convertBack(any(online.rabko.model.Team.class));
+        verify(teamMapper).toEntity(any(online.rabko.model.Team.class));
         verify(teamServiceImpl).update(id, toUpdate);
-        verify(teamConverter).convert(updated);
+        verify(teamMapper).toDto(updated);
     }
 
     @Test
@@ -142,14 +142,14 @@ class TeamsControllerTest {
             .statusCode(204);
 
         verify(teamServiceImpl).delete(id);
-        verifyNoInteractions(teamConverter);
+        verifyNoInteractions(teamMapper);
     }
 
     @Test
     void teamsIdGet_shouldReturnNotFound() {
         Long id = 404L;
-        when(teamServiceImpl.findById(id)).thenThrow(
-            new ResponseStatusException(HttpStatus.NOT_FOUND));
+        when(teamServiceImpl.findById(id))
+            .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         given()
             .when()

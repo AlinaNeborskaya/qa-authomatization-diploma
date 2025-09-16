@@ -1,50 +1,53 @@
-package online.rabko.basketball.unit.controller.converter;
+package online.rabko.basketball.unit.controller.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDate;
-import online.rabko.basketball.controller.converter.SeasonConverter;
+import online.rabko.basketball.controller.mapper.SeasonMapper;
 import online.rabko.basketball.entity.Season;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 /**
- * Unit tests for {@link SeasonConverter}.
+ * Unit tests for {@link SeasonMapper}.
  */
-class SeasonConverterTest {
+class SeasonMapperTest {
 
-    private final SeasonConverter converter = new SeasonConverter();
+    private final SeasonMapper mapper = Mappers.getMapper(SeasonMapper.class);
 
     @Test
-    void convert_shouldMapAllFields() {
+    void toDto_shouldMapAllFields() {
         LocalDate start = LocalDate.of(2025, 1, 1);
         LocalDate end = LocalDate.of(2025, 12, 31);
-        Season src = Season.builder()
-            .id(100L)
+
+        Season entity = Season.builder()
+            .id(1L)
             .name("Season 2025")
             .startDate(start)
             .endDate(end)
             .build();
 
-        online.rabko.model.Season dto = converter.convert(src);
+        online.rabko.model.Season dto = mapper.toDto(entity);
 
-        assertEquals(100L, dto.getId());
+        assertEquals(1L, dto.getId());
         assertEquals("Season 2025", dto.getName());
         assertEquals(start, dto.getStartDate());
         assertEquals(end, dto.getEndDate());
     }
 
     @Test
-    void convertBack_shouldMapAllFields_withoutId() {
+    void toEntity_shouldMapScalars() {
         LocalDate start = LocalDate.of(2026, 1, 1);
-        LocalDate end = LocalDate.of(2026, 12, 31);
+        LocalDate end = LocalDate.of(2026, 6, 30);
+
         online.rabko.model.Season dto = new online.rabko.model.Season()
             .id(999L)
             .name("Season 2026")
             .startDate(start)
             .endDate(end);
 
-        Season entity = converter.convertBack(dto);
+        Season entity = mapper.toEntity(dto);
 
         assertNull(entity.getId());
         assertEquals("Season 2026", entity.getName());

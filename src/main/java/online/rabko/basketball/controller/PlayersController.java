@@ -3,14 +3,11 @@ package online.rabko.basketball.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import online.rabko.api.PlayersApi;
-import online.rabko.basketball.controller.converter.PlayerConverter;
+import online.rabko.basketball.controller.mapper.PlayerMapper;
+import online.rabko.basketball.entity.Player;
 import online.rabko.basketball.service.impl.PlayerServiceImpl;
-import online.rabko.basketball.service.impl.TeamServiceImpl;
-import online.rabko.model.Player;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,66 +20,39 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlayersController implements PlayersApi {
 
     private final PlayerServiceImpl playerServiceImpl;
-    private final TeamServiceImpl teamServiceImpl;
-    private final PlayerConverter playerConverter;
+    private final PlayerMapper playerMapper;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public ResponseEntity<List<Player>> playersGet() {
-        List<Player> body = playerServiceImpl.findAll()
-            .stream()
-            .map(playerConverter::convert)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(body);
+    public ResponseEntity<List<online.rabko.model.Player>> playersGet() {
+        return ResponseEntity.ok(
+            playerServiceImpl.findAll().stream()
+                .map(playerMapper::toDto)
+                .toList()
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public ResponseEntity<Player> playersIdGet(Long id) {
-        var entity = playerServiceImpl.findById(id);
-        return ResponseEntity.ok(playerConverter.convert(entity));
+    public ResponseEntity<online.rabko.model.Player> playersIdGet(Long id) {
+        return ResponseEntity.ok(
+            playerMapper.toDto(playerServiceImpl.findById(id))
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Player> playersPost(Player dto) {
-        dto.setId(null);
-        var entity = playerConverter.convertBack(dto);
-        if (Objects.nonNull(dto.getTeamId())) {
-            entity.setTeam(teamServiceImpl.findById(dto.getTeamId()));
-        }
-        var created = playerServiceImpl.create(entity);
-        return ResponseEntity.status(CREATED).body(playerConverter.convert(created));
+    public ResponseEntity<online.rabko.model.Player> playersPost(online.rabko.model.Player dto) {
+        Player created = playerServiceImpl.create(playerMapper.toEntity(dto));
+        return ResponseEntity.status(CREATED).body(playerMapper.toDto(created));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Player> playersIdPut(Long id, Player dto) {
-        dto.setId(null);
-        var entity = playerConverter.convertBack(dto);
-        entity.setId(id);
-        if (Objects.nonNull(dto.getTeamId())) {
-            entity.setTeam(teamServiceImpl.findById(dto.getTeamId()));
-        } else {
-            entity.setTeam(null);
-        }
-        var updated = playerServiceImpl.update(id, entity);
-        return ResponseEntity.ok(playerConverter.convert(updated));
+    public ResponseEntity<online.rabko.model.Player> playersIdPut(Long id,
+        online.rabko.model.Player dto) {
+        Player updated = playerServiceImpl.update(id, playerMapper.toEntity(dto));
+        return ResponseEntity.ok(playerMapper.toDto(updated));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> playersIdDelete(Long id) {

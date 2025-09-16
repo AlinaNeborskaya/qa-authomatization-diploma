@@ -3,9 +3,9 @@ package online.rabko.basketball.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import online.rabko.api.UsersApi;
-import online.rabko.basketball.controller.converter.UserConverter;
+import online.rabko.basketball.controller.mapper.UserMapper;
+import online.rabko.basketball.entity.User;
 import online.rabko.basketball.service.impl.UserServiceImpl;
-import online.rabko.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,47 +18,34 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsersController implements UsersApi {
 
     private final UserServiceImpl userServiceImpl;
-    private final UserConverter converter;
+    private final UserMapper userMapper;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> usersGet() {
+    public ResponseEntity<List<online.rabko.model.User>> usersGet() {
         return ResponseEntity.ok(
             userServiceImpl.findAll().stream()
-                .map(converter::convert)
+                .map(userMapper::toDto)
                 .toList()
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @PreAuthorize("hasRole('ADMIN')")
     @Override
-    public ResponseEntity<User> usersIdGet(Long id) {
-        return ResponseEntity.ok(converter.convert(userServiceImpl.findById(id)));
-
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<online.rabko.model.User> usersIdGet(Long id) {
+        return ResponseEntity.ok(userMapper.toDto(userServiceImpl.findById(id)));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> usersIdPut(Long id, User dto) {
-        dto.setId(null);
-        online.rabko.basketball.entity.User toUpdate = converter.convertBack(dto);
+    public ResponseEntity<online.rabko.model.User> usersIdPut(Long id,
+        online.rabko.model.User dto) {
+        User toUpdate = userMapper.toEntity(dto);
         toUpdate.setId(id);
-        online.rabko.basketball.entity.User updated = userServiceImpl.update(id, toUpdate);
-        return ResponseEntity.ok(converter.convert(updated));
+        User updated = userServiceImpl.update(id, toUpdate);
+        return ResponseEntity.ok(userMapper.toDto(updated));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> usersIdDelete(Long id) {

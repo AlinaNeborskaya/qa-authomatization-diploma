@@ -5,7 +5,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import online.rabko.api.SeasonsApi;
-import online.rabko.basketball.controller.converter.SeasonConverter;
+import online.rabko.basketball.controller.mapper.SeasonMapper;
 import online.rabko.basketball.entity.Season;
 import online.rabko.basketball.service.impl.SeasonServiceImpl;
 import org.springframework.http.ResponseEntity;
@@ -20,33 +20,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class SeasonsController implements SeasonsApi {
 
     private final SeasonServiceImpl seasonServiceImpl;
-    private final SeasonConverter seasonConverter;
+    private final SeasonMapper seasonMapper;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ResponseEntity<List<online.rabko.model.Season>> seasonsGet() {
-        List<Season> seasons = seasonServiceImpl.findAll();
         return ResponseEntity.ok(
-            seasons.stream()
-                .map(seasonConverter::convert)
+            seasonServiceImpl.findAll().stream()
+                .map(seasonMapper::toDto)
                 .toList()
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ResponseEntity<online.rabko.model.Season> seasonsIdGet(Long id) {
-        Season season = seasonServiceImpl.findById(id);
-        return ResponseEntity.ok(seasonConverter.convert(season));
+        return ResponseEntity.ok(
+            seasonMapper.toDto(seasonServiceImpl.findById(id))
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> seasonsIdDelete(Long id) {
@@ -54,32 +45,22 @@ public class SeasonsController implements SeasonsApi {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Season> seasonsIdPut(
         Long id,
-        online.rabko.model.Season seasonDto
+        online.rabko.model.Season dto
     ) {
-        seasonDto.setId(null);
-        Season replacement = seasonConverter.convertBack(seasonDto);
-        replacement.setId(id);
-        Season updated = seasonServiceImpl.update(id, replacement);
-        return ResponseEntity.ok(seasonConverter.convert(updated));
+        Season updated = seasonServiceImpl.update(id, seasonMapper.toEntity(dto));
+        return ResponseEntity.ok(seasonMapper.toDto(updated));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Season> seasonsPost(
-        online.rabko.model.Season seasonDto) {
-        seasonDto.setId(null);
-        Season toCreate = seasonConverter.convertBack(seasonDto);
-        Season created = seasonServiceImpl.create(toCreate);
-        return ResponseEntity.status(CREATED).body(seasonConverter.convert(created));
+        online.rabko.model.Season dto
+    ) {
+        Season created = seasonServiceImpl.create(seasonMapper.toEntity(dto));
+        return ResponseEntity.status(CREATED).body(seasonMapper.toDto(created));
     }
 }

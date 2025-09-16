@@ -16,7 +16,8 @@ import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.util.List;
 import online.rabko.basketball.controller.UsersController;
-import online.rabko.basketball.controller.converter.UserConverter;
+import online.rabko.basketball.controller.mapper.UserMapper;
+import online.rabko.basketball.entity.User;
 import online.rabko.basketball.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class UsersControllerTest {
     private UserServiceImpl userServiceImpl;
 
     @Mock
-    private UserConverter converter;
+    private UserMapper userMapper;
 
     @InjectMocks
     private UsersController usersController;
@@ -49,13 +50,11 @@ class UsersControllerTest {
 
     @Test
     void usersGet_shouldReturnList() {
-        online.rabko.basketball.entity.User u1 = online.rabko.basketball.entity.User.builder()
-            .id(1L).username("alice").build();
-        online.rabko.basketball.entity.User u2 = online.rabko.basketball.entity.User.builder()
-            .id(2L).username("bob").build();
+        User u1 = User.builder().id(1L).username("alice").build();
+        User u2 = User.builder().id(2L).username("bob").build();
         when(userServiceImpl.findAll()).thenReturn(List.of(u1, u2));
-        when(converter.convert(u1)).thenReturn(new online.rabko.model.User());
-        when(converter.convert(u2)).thenReturn(new online.rabko.model.User());
+        when(userMapper.toDto(u1)).thenReturn(new online.rabko.model.User());
+        when(userMapper.toDto(u2)).thenReturn(new online.rabko.model.User());
 
         given()
             .when()
@@ -65,16 +64,15 @@ class UsersControllerTest {
             .body("$", hasSize(2));
 
         verify(userServiceImpl).findAll();
-        verify(converter, times(2)).convert(any(online.rabko.basketball.entity.User.class));
+        verify(userMapper, times(2)).toDto(any(User.class));
     }
 
     @Test
     void usersIdGet_shouldReturnUser() {
         Long id = 42L;
-        online.rabko.basketball.entity.User entity = online.rabko.basketball.entity.User.builder()
-            .id(id).username("john").build();
+        User entity = User.builder().id(id).username("john").build();
         when(userServiceImpl.findById(id)).thenReturn(entity);
-        when(converter.convert(entity)).thenReturn(new online.rabko.model.User());
+        when(userMapper.toDto(entity)).thenReturn(new online.rabko.model.User());
 
         given()
             .when()
@@ -84,25 +82,18 @@ class UsersControllerTest {
             .body("$", notNullValue());
 
         verify(userServiceImpl).findById(id);
-        verify(converter).convert(entity);
+        verify(userMapper).toDto(entity);
     }
 
     @Test
     void usersIdPut_shouldUpdateUser() {
         Long id = 7L;
-        online.rabko.model.User incomingDto = new online.rabko.model.User();
-        incomingDto.setId(999L);
+        User toUpdate = User.builder().username("new").build();
+        User updated = User.builder().id(id).username("new").build();
 
-        online.rabko.basketball.entity.User toUpdate = online.rabko.basketball.entity.User.builder()
-            .username("new").build();
-        when(converter.convertBack(any(online.rabko.model.User.class))).thenReturn(toUpdate);
-
-        online.rabko.basketball.entity.User updated = online.rabko.basketball.entity.User.builder()
-            .id(id).username("new").build();
-        when(userServiceImpl.update(eq(id),
-            any(online.rabko.basketball.entity.User.class))).thenReturn(
-            updated);
-        when(converter.convert(updated)).thenReturn(new online.rabko.model.User());
+        when(userMapper.toEntity(any(online.rabko.model.User.class))).thenReturn(toUpdate);
+        when(userServiceImpl.update(eq(id), eq(toUpdate))).thenReturn(updated);
+        when(userMapper.toDto(updated)).thenReturn(new online.rabko.model.User());
 
         given()
             .contentType(ContentType.JSON)
@@ -113,9 +104,9 @@ class UsersControllerTest {
             .statusCode(200)
             .body("$", notNullValue());
 
-        verify(converter).convertBack(any(online.rabko.model.User.class));
-        verify(userServiceImpl).update(eq(id), any(online.rabko.basketball.entity.User.class));
-        verify(converter).convert(updated);
+        verify(userMapper).toEntity(any(online.rabko.model.User.class));
+        verify(userServiceImpl).update(id, toUpdate);
+        verify(userMapper).toDto(updated);
     }
 
     @Test
@@ -130,7 +121,7 @@ class UsersControllerTest {
             .statusCode(204);
 
         verify(userServiceImpl).delete(id);
-        verifyNoInteractions(converter);
+        verifyNoInteractions(userMapper);
     }
 
     @Test
@@ -161,7 +152,7 @@ class UsersControllerTest {
     @Test
     void usersIdPut_shouldReturnBadRequest() {
         Long id = 5L;
-        when(converter.convertBack(any(online.rabko.model.User.class)))
+        when(userMapper.toEntity(any(online.rabko.model.User.class)))
             .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
         given()
