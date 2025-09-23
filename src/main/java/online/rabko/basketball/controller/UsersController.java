@@ -7,7 +7,6 @@ import online.rabko.basketball.controller.mapper.UserMapper;
 import online.rabko.basketball.entity.User;
 import online.rabko.basketball.service.basketball.BasketballAppUserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -21,7 +20,6 @@ public class UsersController implements UsersApi {
     private final UserMapper userMapper;
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<online.rabko.model.User>> usersGet() {
         return ResponseEntity.ok(
             basketballAppUserService.findAll().stream()
@@ -31,13 +29,11 @@ public class UsersController implements UsersApi {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.User> usersIdGet(Long id) {
         return ResponseEntity.ok(userMapper.toDto(basketballAppUserService.findById(id)));
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.User> usersIdPut(Long id,
         online.rabko.model.User dto) {
         User toUpdate = userMapper.toEntity(dto);
@@ -47,7 +43,6 @@ public class UsersController implements UsersApi {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> usersIdDelete(Long id) {
         basketballAppUserService.delete(id);
         return ResponseEntity.noContent().build();

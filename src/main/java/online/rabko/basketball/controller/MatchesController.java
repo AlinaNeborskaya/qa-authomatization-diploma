@@ -11,7 +11,6 @@ import online.rabko.basketball.service.basketball.BasketballMatchService;
 import online.rabko.model.PlayerStats;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -50,7 +49,6 @@ public class MatchesController implements MatchesApi {
      * {@inheritDoc}
      */
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> matchesIdDelete(Long id) {
         basketballMatchService.delete(id);
         return ResponseEntity.noContent().build();
@@ -60,7 +58,6 @@ public class MatchesController implements MatchesApi {
      * {@inheritDoc}
      */
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Match> matchesPost(online.rabko.model.Match dto) {
         Match created = basketballMatchService.create(matchMapper.toEntity(dto));
         return ResponseEntity.status(CREATED).body(matchMapper.toDto(created));
@@ -70,7 +67,6 @@ public class MatchesController implements MatchesApi {
      * {@inheritDoc}
      */
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Match> matchesIdPut(Long id,
         online.rabko.model.Match dto) {
         Match updated = basketballMatchService.update(id, matchMapper.toEntity(dto));

@@ -9,7 +9,6 @@ import online.rabko.basketball.controller.mapper.SeasonMapper;
 import online.rabko.basketball.entity.Season;
 import online.rabko.basketball.service.basketball.BasketballSeasonService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -39,16 +38,13 @@ public class SeasonsController implements SeasonsApi {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> seasonsIdDelete(Long id) {
         basketballSeasonService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<online.rabko.model.Season> seasonsIdPut(
-        Long id,
+    public ResponseEntity<online.rabko.model.Season> seasonsIdPut(Long id,
         online.rabko.model.Season dto
     ) {
         Season updated = basketballSeasonService.update(id, seasonMapper.toEntity(dto));
@@ -56,10 +52,8 @@ public class SeasonsController implements SeasonsApi {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Season> seasonsPost(
-        online.rabko.model.Season dto
-    ) {
+        online.rabko.model.Season dto) {
         Season created = basketballSeasonService.create(seasonMapper.toEntity(dto));
         return ResponseEntity.status(CREATED).body(seasonMapper.toDto(created));
     }

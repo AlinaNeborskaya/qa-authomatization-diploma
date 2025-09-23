@@ -52,14 +52,29 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**",
-                    "/oas/**")
-                .permitAll()
+                    "/oas/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/matches/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/matches/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/matches/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/matches/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/players/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/players/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/players/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/players/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/seasons/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/seasons/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/seasons/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/seasons/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/teams/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/teams/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/teams/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/teams/**").hasRole("ADMIN")
+                .requestMatchers("/users/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

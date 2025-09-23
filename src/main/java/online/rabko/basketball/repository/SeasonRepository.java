@@ -1,7 +1,6 @@
 package online.rabko.basketball.repository;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import online.rabko.basketball.entity.Season;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,14 +19,6 @@ public interface SeasonRepository extends JpaRepository<Season, Long> {
      * @return true if a season exists with the given name, false otherwise.
      */
     boolean existsByNameIgnoreCase(String name);
-
-    /**
-     * Finds a season by its name (case-insensitive).
-     *
-     * @param name the season name.
-     * @return an Optional containing the season if found, or empty otherwise.
-     */
-    Optional<Season> findByNameIgnoreCase(String name);
 
     /**
      * Checks whether any season overlaps with the given date range.

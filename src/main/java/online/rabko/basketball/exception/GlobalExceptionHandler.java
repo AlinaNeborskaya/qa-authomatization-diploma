@@ -77,8 +77,8 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles errors triggered by {@code @Valid}. Returns 400 Bad Request with the
-     * first field error message.
+     * Handles errors triggered by {@code @Valid}. Returns 400 Bad Request with the first field
+     * error message.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Error> handleMethodArgumentNotValidValidation(

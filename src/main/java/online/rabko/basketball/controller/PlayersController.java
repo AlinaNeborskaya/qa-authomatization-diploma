@@ -9,7 +9,6 @@ import online.rabko.basketball.controller.mapper.PlayerMapper;
 import online.rabko.basketball.entity.Player;
 import online.rabko.basketball.service.basketball.BasketballPlayerService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -39,14 +38,12 @@ public class PlayersController implements PlayersApi {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Player> playersPost(online.rabko.model.Player dto) {
         Player created = basketballPlayerService.create(playerMapper.toEntity(dto));
         return ResponseEntity.status(CREATED).body(playerMapper.toDto(created));
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<online.rabko.model.Player> playersIdPut(Long id,
         online.rabko.model.Player dto) {
         Player updated = basketballPlayerService.update(id, playerMapper.toEntity(dto));
@@ -54,7 +51,6 @@ public class PlayersController implements PlayersApi {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> playersIdDelete(Long id) {
         basketballPlayerService.delete(id);
         return ResponseEntity.noContent().build();
