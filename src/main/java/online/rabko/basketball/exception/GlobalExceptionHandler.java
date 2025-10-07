@@ -159,8 +159,7 @@ public class GlobalExceptionHandler {
      * Handles unsupported HTTP methods. Returns 405 Method Not Allowed.
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Error> handleMethodNotSupported(
-        HttpRequestMethodNotSupportedException ex) {
+    public ResponseEntity<Error> handleMethodNotSupported() {
         return build(HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed");
     }
 
@@ -168,7 +167,7 @@ public class GlobalExceptionHandler {
      * Handles unsupported content types. Returns 415 Unsupported Media Type.
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<Error> handleMediaType(HttpMediaTypeNotSupportedException ex) {
+    public ResponseEntity<Error> handleMediaType() {
         return build(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported media type");
     }
 
