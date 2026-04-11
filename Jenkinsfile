@@ -10,7 +10,8 @@ pipeline {
 
         stage('Run tests') {
             steps {
-                sh './gradlew clean test'
+                // Заменили sh на bat для Windows
+                bat './gradlew clean test'
             }
         }
 
