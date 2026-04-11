@@ -1,62 +1,38 @@
 pipeline {
     agent any
 
-    // Параметры для выбора типа тестов
-    parameters {
-        choice(
-            name: 'TEST_TYPE',
-            choices: ['API', 'WEB'],
-            description: 'Выберите тип тестов для запуска'
-        )
+    tools {
+        // названия должны совпадать с теми, что вы задали в Global Tool Configuration
+        maven 'maven'
+        jdk 'jdk21'
     }
 
-    // Триггер для автозапуска ежедневно в 15:00
-    triggers {
-        cron('0 15 * * *')
-    }
 
     stages {
-        stage('Checkstyle') {
+        stage('Checkout') {
             steps {
-                echo 'Запуск Checkstyle...'
-                // Запуск bat файла для проверки стиля кода
-                bat 'checkstyle.bat'
+                checkout scm
             }
         }
 
-        stage('Build') {
+        stage('Run tests') {
             steps {
-                echo 'Сборка проекта...'
-                // Запуск bat файла для сборки
-                bat 'build.bat'
+                sh 'mvn clean test'
             }
         }
 
-        stage('Run Tests') {
+        stage('Allure report') {
             steps {
-                script {
-                    if (params.TEST_TYPE == 'API') {
-                        echo 'Запуск API тестов...'
-                        bat 'run-api-test.bat'
-                    } else if (params.TEST_TYPE == 'WEB') {
-                        echo 'Запуск WEB тестов...'
-                        bat 'run-web_test.bat'
-                    }
-                }
-            }
-        }
-
-        stage('Allure Report') {
-            steps {
-                echo 'Генерация Allure отчета...'
-                bat 'allure-report.bat'
+                allure includeProperties: false,
+                       jdk: '',
+                       results: [[path: 'target/allure-results']]
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline завершен'
+            junit 'target/surefire-reports/*.xml'
         }
     }
 }
