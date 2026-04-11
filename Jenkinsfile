@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'TEST_TYPE',
+            choices: ['api', 'web'],
+            description: 'Выбери тип тестов для запуска'
+        )
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -10,8 +18,13 @@ pipeline {
 
         stage('Run tests') {
             steps {
-                // Заменили sh на bat для Windows
-                bat 'run-api.test.bat'
+                script {
+                    if (params.TEST_TYPE == 'api') {
+                        bat 'run-api.test.bat'
+                    } else if (params.TEST_TYPE == 'web') {
+                        bat 'run-web-test.bat'
+                    }
+                }
             }
         }
 
