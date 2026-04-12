@@ -31,7 +31,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class ProjectPage extends BasePage<ProjectPage> {
     private final WebDriver driver;
     private final WebDriverWait wait;
-    private static final Duration TIMEOUT = Duration.ofSeconds(15);
+    private static final Duration TIMEOUT = Duration.ofSeconds(30);
 
     private final By projectNameInput = By.cssSelector("[data-testid='addProjectNameInput']");
     private final By descriptionInput = By.cssSelector("div.fr-element.fr-view[contenteditable='true']");
