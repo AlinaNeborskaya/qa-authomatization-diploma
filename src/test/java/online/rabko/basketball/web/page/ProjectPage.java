@@ -102,7 +102,7 @@ public class ProjectPage extends BasePage<ProjectPage> {
      */
     @Step("Ввести название проекта: {name}")
     public ProjectPage enterProjectName(String name) {
-        closePendoIfPresent(driver);
+        prepareUI();
         WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(projectNameInput));
         input.clear();
         input.sendKeys(name);
@@ -117,7 +117,7 @@ public class ProjectPage extends BasePage<ProjectPage> {
      */
     @Step("Ввести описание проекта")
     public ProjectPage enterDescription(String text) {
-        closePendoIfPresent(driver);
+        prepareUI();
         WebElement editor = wait.until(ExpectedConditions.visibilityOfElementLocated(descriptionInput));
         editor.click();
         editor.sendKeys(Keys.CONTROL + "a");
@@ -133,7 +133,7 @@ public class ProjectPage extends BasePage<ProjectPage> {
      */
     @Step("Нажать кнопку 'Добавить проект'")
     public WebDriver clickAddProject() {
-        closePendoIfPresent(driver);
+        prepareUI();
         WebElement button = wait.until(ExpectedConditions.elementToBeClickable(addProjectButton));
         button.click();
         return driver;
@@ -165,12 +165,10 @@ public class ProjectPage extends BasePage<ProjectPage> {
         }
     }
 
-    public void closePendoIfPresent(WebDriver driver) {
-        try {
-            ((JavascriptExecutor) driver).executeScript("""
-            const pendo = document.querySelector('#pendo-guide-container');
-            if (pendo) pendo.remove();
-        """);
-        } catch (Exception ignored) {}
+    private void prepareUI() {
+        ((JavascriptExecutor) driver).executeScript("""
+        document.querySelector('#pendo-guide-container')?.remove();
+        document.querySelector('.pendo-backdrop')?.remove();
+    """);
     }
 }
