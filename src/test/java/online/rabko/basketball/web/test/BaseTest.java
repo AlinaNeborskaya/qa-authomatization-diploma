@@ -61,6 +61,7 @@ public class BaseTest {
         options.addArguments("--disable-gpu");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-features=EnablePendo");
         driver = new ChromeDriver(options);
     }
     /**
