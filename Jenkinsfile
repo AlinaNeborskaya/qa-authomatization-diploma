@@ -30,9 +30,7 @@ pipeline {
 
         stage('Allure report') {
             steps {
-                allure includeProperties: false,
-                       jdk: '',
-                       results: [[path: 'allure-results']]
+                bat 'allure-report.bat'
             }
         }
     }
