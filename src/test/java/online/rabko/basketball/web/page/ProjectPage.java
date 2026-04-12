@@ -1,44 +1,30 @@
 package online.rabko.basketball.web.page;
 
 import io.qameta.allure.Step;
-import java.time.Duration;
-import java.util.List;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 
-/**
- * Page Object для страницы создания проекта.
- * <p>
- * Содержит методы для заполнения формы создания проекта,
- * проверки загрузки страницы, отображения сообщений и ошибок.
- * </p>
- *
- * <p><b>Особенности:</b></p>
- * <ul>
- *     <li>Страница не может быть открыта напрямую</li>
- *     <li>Проверка загрузки выполняется по заголовку страницы</li>
- *     <li>Используются явные ожидания через {@link WebDriverWait}</li>
- *     <li>Поддерживается fluent API для chain вызовов</li>
- * </ul>
- */
 public class ProjectPage extends BasePage<ProjectPage> {
+
     private final WebDriver driver;
     private final WebDriverWait wait;
-    private static final Duration TIMEOUT = Duration.ofSeconds(30);
 
-    private final By projectNameInput = By.cssSelector("[data-testid='addProjectNameInput']");
-    private final By descriptionInput = By.cssSelector("div.fr-element.fr-view[contenteditable='true']");
-    private final By addProjectButton = By.cssSelector("[data-testid='addEditProjectAddButton']");
-    private final By addProjectHeaderLocator = By.cssSelector("[data-testid='testCaseContentHeaderTitle']");
-    private final By successMessageLocator = By.cssSelector("[data-testid='messageSuccessDivBox']");
-    private final By projectNameErrorLocator = By.id("projectNameError");
+    private static final Duration TIMEOUT = Duration.ofSeconds(15);
+
+    private final By projectNameInput =
+        By.cssSelector("[data-testid='addProjectNameInput']");
+
+    private final By descriptionInput =
+        By.cssSelector("div.fr-element.fr-view[contenteditable='true']");
+
+    private final By addProjectButton =
+        By.cssSelector("[data-testid='addEditProjectAddButton']");
+
+    private final By addProjectHeaderLocator =
+        By.cssSelector("[data-testid='testCaseContentHeaderTitle']");
 
     public ProjectPage(WebDriver driver) {
         super(driver);
@@ -51,124 +37,92 @@ public class ProjectPage extends BasePage<ProjectPage> {
         throw new UnsupportedOperationException("ProjectPage cannot be opened directly");
     }
 
-    /**
-     * Проверяет, что страница Project успешно загружена.
-     *
-     * @throws IllegalStateException если заголовок страницы не содержит "Add Project"
-     */
     @Override
-    @Step("Проверка загрузки страницы Project")
     protected void isLoaded() {
-        try {
-            String headerText = getHeaderText();
-            if (!headerText.contains("Add Project")) {
-                throw new IllegalStateException("Project page not loaded (header mismatch). Found: " + headerText);
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("ProjectPage не загрузилась корректно", e);
-        }
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(
+            addProjectHeaderLocator, "Add Project"
+        ));
     }
 
-    /**
-     * Проверяет, открыта ли страница Project.
-     *
-     * @return true если заголовок содержит "Add Project", иначе false
-     */
-    @Step("Проверить, что страница Project открыта")
-    public boolean isPageOpened() {
-        try {
-            return getHeaderText().contains("Add Project");
-        } catch (Exception e) {
-            return false;
-        }
-    }
+    // =========================
+    // PUBLIC ACTIONS
+    // =========================
 
-    /**
-     * Получает текст заголовка страницы Project.
-     *
-     * @return текст заголовка
-     */
-    @Step("Получить текст заголовка страницы Project")
-    public String getHeaderText() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(addProjectHeaderLocator))
-                .getText().trim();
-    }
-
-    /**
-     * Вводит название проекта.
-     *
-     * @param name название проекта
-     * @return текущий объект для chain вызова
-     */
     @Step("Ввести название проекта: {name}")
     public ProjectPage enterProjectName(String name) {
-        prepareUI();
-        WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(projectNameInput));
+        WebElement input = stableFindClickable(projectNameInput);
         input.clear();
         input.sendKeys(name);
         return this;
     }
 
-    /**
-     * Вводит описание проекта.
-     *
-     * @param text описание проекта
-     * @return текущий объект для chain вызова
-     */
     @Step("Ввести описание проекта")
     public ProjectPage enterDescription(String text) {
-        prepareUI();
-        WebElement editor = wait.until(ExpectedConditions.visibilityOfElementLocated(descriptionInput));
+        WebElement editor = stableFindClickable(descriptionInput);
+
         editor.click();
-        editor.sendKeys(Keys.CONTROL + "a");
-        editor.sendKeys(Keys.DELETE);
+        sleep(200);
+
+        // защита от Froala/overlay состояния
+        clearWithJs(editor);
         editor.sendKeys(text);
+
         return this;
     }
 
-    /**
-     * Нажимает кнопку добавления проекта.
-     *
-     * @return текущий WebDriver для последующих действий
-     */
-    @Step("Нажать кнопку 'Добавить проект'")
-    public WebDriver clickAddProject() {
-        prepareUI();
-        WebElement button = wait.until(ExpectedConditions.elementToBeClickable(addProjectButton));
+    @Step("Нажать 'Добавить проект'")
+    public void clickAddProject() {
+        WebElement button = stableFindClickable(addProjectButton);
         button.click();
-        return driver;
     }
 
-    /**
-     * Получает текст сообщения об успешном создании проекта.
-     *
-     * @return текст сообщения
-     */
-    @Step("Получить сообщение об успешном создании проекта")
-    public String getSuccessMessage() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(successMessageLocator))
-                .getText().trim();
-    }
+    // =========================
+    // STABILITY CORE (ВАЖНО)
+    // =========================
 
-    /**
-     * Получает текст ошибки названия проекта (если есть).
-     *
-     * @return текст ошибки или пустую строку, если ошибки нет
-     */
-    @Step("Получить текст ошибки названия проекта")
-    public String getProjectNameErrorMessage() {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(projectNameErrorLocator))
-                    .getText().trim();
-        } catch (Exception e) {
-            return "";
+    private WebElement stableFindClickable(By locator) {
+
+        for (int i = 0; i < 5; i++) {
+            try {
+                removeOverlays();
+
+                WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(3));
+
+                WebElement el = shortWait.until(
+                    ExpectedConditions.elementToBeClickable(locator)
+                );
+
+                return el;
+
+            } catch (Exception ignored) {
+                sleep(300);
+            }
         }
+
+        throw new RuntimeException("Element not stable/clickable: " + locator);
     }
 
-    private void prepareUI() {
-        ((JavascriptExecutor) driver).executeScript("""
-        document.querySelector('#pendo-guide-container')?.remove();
-        document.querySelector('.pendo-backdrop')?.remove();
-    """);
+    private void removeOverlays() {
+        try {
+            ((JavascriptExecutor) driver).executeScript("""
+                document.querySelector('#pendo-guide-container')?.remove();
+                document.querySelector('.pendo-backdrop')?.remove();
+                document.querySelector('[id*="pendo"]')?.remove();
+            """);
+        } catch (Exception ignored) {}
+    }
+
+    private void clearWithJs(WebElement el) {
+        try {
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].innerText = '';", el
+            );
+        } catch (Exception ignored) {}
+    }
+
+    private void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignored) {}
     }
 }
