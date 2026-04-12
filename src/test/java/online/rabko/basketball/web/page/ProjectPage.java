@@ -127,10 +127,16 @@ public class ProjectPage extends BasePage<ProjectPage> {
      * @return текущий WebDriver для последующих действий
      */
     @Step("Нажать кнопку 'Добавить проект'")
-    public WebDriver clickAddProject() {
+    public ProjectPage clickAddProject() {
+
         WebElement button = wait.until(ExpectedConditions.elementToBeClickable(addProjectButton));
+
+        ((org.openqa.selenium.JavascriptExecutor) driver)
+            .executeScript("arguments[0].scrollIntoView(true);", button);
+
         button.click();
-        return driver;
+
+        return this;
     }
 
     /**
