@@ -60,6 +60,7 @@ dependencies {
     testImplementation(group = "org.seleniumhq.selenium", name = "selenium-java", version = "4.18.1")
     testImplementation(group = "io.qameta.allure", name = "allure-junit5", version = "2.24.0")
     testImplementation(group = "io.rest-assured", name = "rest-assured", version = "5.3.0")
+    testImplementation(group ="io.qameta.allure", name = "allure-rest-assured", version = "2.24.0")
 
     // Lombok
     compileOnly(group = "org.projectlombok", name = "lombok")
