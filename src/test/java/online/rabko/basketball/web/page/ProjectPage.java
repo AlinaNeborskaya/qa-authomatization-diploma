@@ -2,8 +2,11 @@ package online.rabko.basketball.web.page;
 
 import io.qameta.allure.Step;
 import java.time.Duration;
+import java.util.List;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -99,6 +102,7 @@ public class ProjectPage extends BasePage<ProjectPage> {
      */
     @Step("Ввести название проекта: {name}")
     public ProjectPage enterProjectName(String name) {
+        closePendoIfPresent(driver);
         WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(projectNameInput));
         input.clear();
         input.sendKeys(name);
@@ -113,6 +117,7 @@ public class ProjectPage extends BasePage<ProjectPage> {
      */
     @Step("Ввести описание проекта")
     public ProjectPage enterDescription(String text) {
+        closePendoIfPresent(driver);
         WebElement editor = wait.until(ExpectedConditions.visibilityOfElementLocated(descriptionInput));
         editor.click();
         editor.sendKeys(Keys.CONTROL + "a");
@@ -128,6 +133,7 @@ public class ProjectPage extends BasePage<ProjectPage> {
      */
     @Step("Нажать кнопку 'Добавить проект'")
     public WebDriver clickAddProject() {
+        closePendoIfPresent(driver);
         WebElement button = wait.until(ExpectedConditions.elementToBeClickable(addProjectButton));
         button.click();
         return driver;
@@ -157,5 +163,14 @@ public class ProjectPage extends BasePage<ProjectPage> {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public void closePendoIfPresent(WebDriver driver) {
+        try {
+            ((JavascriptExecutor) driver).executeScript("""
+            const pendo = document.querySelector('#pendo-guide-container');
+            if (pendo) pendo.remove();
+        """);
+        } catch (Exception ignored) {}
     }
 }
