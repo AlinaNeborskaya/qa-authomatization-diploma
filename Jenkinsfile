@@ -44,12 +44,6 @@ pipeline {
     post {
         always {
             junit 'build/test-results/test/*.xml'
-
-            publishHTML([
-                reportDir: 'allure-report',
-                reportFiles: 'index.html',
-                reportName: 'Allure Report'
-            ])
         }
     }
 }
