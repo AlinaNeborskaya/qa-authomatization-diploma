@@ -1,14 +1,15 @@
 @echo off
-set RESULTS_DIR=/allure-results
 
+set RESULTS_DIR=allure-results
+set REPORT_DIR=allure-report
 
-echo Запуск Allure Serve для папки "%RESULTS_DIR%"...
-allure serve "%RESULTS_DIR%"
+echo Generating Allure report...
+
+allure generate %RESULTS_DIR% --clean -o %REPORT_DIR%
 
 IF %ERRORLEVEL% EQU 0 (
-    echo Отчет успешно открыт в браузере.
+    echo Allure report generated successfully.
 ) ELSE (
-    echo Ошибка при запуске Allure Serve.
+    echo Error generating Allure report.
     exit /b 1
 )
-pause
