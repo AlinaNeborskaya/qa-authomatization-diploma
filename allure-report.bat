@@ -1,7 +1,7 @@
 @echo off
 
-set RESULTS_DIR=allure-results
-set REPORT_DIR=allure-report
+set RESULTS_DIR=%WORKSPACE%\allure-results
+set REPORT_DIR=%WORKSPACE%\allure-report
 
 echo Generating Allure report...
 
