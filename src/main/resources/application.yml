@@ -3,8 +3,8 @@ spring:
     name: basketball
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/basketball}
-    username: ${SPRING_DATASOURCE_USERNAME:vibe}
-    password: ${SPRING_DATASOURCE_PASSWORD:vibe}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:artem201320133}
   jpa:
     hibernate:
       ddl-auto: none
@@ -15,7 +15,7 @@ spring:
     change-log: classpath:db/changelog/main.yaml
 
 server:
-  port: 5040
+  port: 8040
 
 logging:
   level:

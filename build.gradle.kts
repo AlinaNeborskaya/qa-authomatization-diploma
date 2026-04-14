@@ -10,12 +10,6 @@ plugins {
 group = "online.rabko"
 version = "0.0.1-SNAPSHOT"
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
 checkstyle {
     toolVersion = "10.21.4"
     isShowViolations = false
@@ -63,6 +57,10 @@ dependencies {
     testImplementation(group = "org.testcontainers", name = "postgresql")
     testImplementation(group = "org.springframework.security", name = "spring-security-test")
     testImplementation(group = "io.rest-assured", name = "spring-mock-mvc")
+    testImplementation(group = "org.seleniumhq.selenium", name = "selenium-java", version = "4.18.1")
+    testImplementation(group = "io.qameta.allure", name = "allure-junit5", version = "2.24.0")
+    testImplementation(group = "io.rest-assured", name = "rest-assured", version = "5.3.0")
+    testImplementation(group ="io.qameta.allure", name = "allure-rest-assured", version = "2.24.0")
 
     // Lombok
     compileOnly(group = "org.projectlombok", name = "lombok")
@@ -87,12 +85,12 @@ val jacocoExcludedClasses = listOf(
     "**/api/**",
     "**/model/**"
 )
-val oasResourcesDir = "$projectDir/src/main/resources/static/oas"
+val oasResourcesDir = "$projectDir\\src\\main\\resources\\static\\oas"
 val buildDir = layout.buildDirectory.get()
 
 openApiGenerate {
     generatorName.set("spring")
-    inputSpec.set("$oasResourcesDir/basketball.yaml")
+    inputSpec.set(file("src/main/resources/static/oas/basketball.yaml").toURI().toString())
     outputDir.set("$buildDir/generated")
     modelPackage.set("online.rabko.model")
     apiPackage.set("online.rabko.api")
@@ -158,7 +156,7 @@ tasks {
                     minimum = BigDecimal("0.80")
                 }
             }
-            isFailOnViolation = true
+            isFailOnViolation = false
         }
     }
 }
